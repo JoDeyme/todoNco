@@ -31,7 +31,7 @@ class TaskController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $task->setCreatedAt(new \DateTimeImmutable());
-            $task->setisDone(false);
+            $task->setIsDone(false);
             $taskRepository->add($task, true);
             $this->addFlash('success', 'La tâche a été bien été ajoutée.');
 
@@ -66,7 +66,7 @@ class TaskController extends AbstractController
     #[Route('/tasks/{id}/toggle', name: 'task_toggle')]
     public function toggleTaskAction(Task $task, TaskRepository $taskRepository): Response
     {
-        $task->toggle(!$task->getisDone());
+        $task->toggle(!$task->isDone());
         $taskRepository->add($task, true);
         $this->addFlash('success', sprintf('La tâche %s a bien été marquée comme faite.', $task->getTitle()));
 
