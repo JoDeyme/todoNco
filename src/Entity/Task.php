@@ -15,7 +15,7 @@ class Task
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
     private ?\DateTimeInterface $createdAt = null;
 
     #[ORM\Column(length: 255)]

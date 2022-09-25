@@ -12,8 +12,18 @@ class TaskType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('title')
-            ->add('content');
+            ->add('title', null, [
+                'label' => 'Titre',
+                'attr' => [
+                    'placeholder' => 'Titre de la tâche',
+                ],
+            ])
+            ->add('content', null, [
+                'label' => 'Contenu',
+                'attr' => [
+                    'placeholder' => 'Contenu de la tâche',
+                ],
+            ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void
