@@ -9,6 +9,8 @@ use Symfony\Component\Routing\Annotation\Route;
 class DefaultController extends AbstractController
 {
     #[Route('/', name: 'homepage')]
+    // limiter l'accès au rôle admin
+
     public function index(): Response
     {
         return $this->render('default/index.html.twig', [

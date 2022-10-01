@@ -29,6 +29,9 @@ class Task
     #[ORM\Column]
     private ?bool $isDone = null;
 
+    #[ORM\ManyToOne(inversedBy: 'tasks')]
+    private ?User $user = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -84,6 +87,18 @@ class Task
 
     public function toggle($flag)
     {
-        $this->isDone = $flag;
+        $this->isDone = !$this->isDone;;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): self
+    {
+        $this->user = $user;
+
+        return $this;
     }
 }

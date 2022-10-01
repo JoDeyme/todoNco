@@ -18,6 +18,7 @@ class TaskController extends AbstractController
     {
         $tasks = $taskRepository->findAll();
 
+
         return $this->render('task/list.html.twig', ['tasks' => $tasks]);
     }
 
@@ -32,6 +33,7 @@ class TaskController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $task->setCreatedAt(new \DateTimeImmutable());
             $task->setIsDone(false);
+            $task->setUser($this->getUser());
             $taskRepository->add($task, true);
             $this->addFlash('success', 'La tâche a été bien été ajoutée.');
 
