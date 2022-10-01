@@ -25,6 +25,12 @@ class TaskController extends AbstractController
     #[Route('/tasks/create', name: 'task_create')]
     public function createAction(Request $request, TaskRepository $taskRepository): Response
     {
+        //user must be login 
+        if (!$this->getUser()) {
+            $this->addFlash('danger', 'Vous devez être connecté pour créer une tâche.');
+            return $this->redirectToRoute('app_login');
+        }
+
         $task = new Task();
         $form = $this->createForm(TaskType::class, $task);
 
