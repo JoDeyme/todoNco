@@ -13,9 +13,15 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class UserController extends AbstractController
 {
-    #[Route('/users', name: 'user_list')]
-    public function listUser(UserRepository $userRepository): Response
+    #[Route('/users', name: 'users_list')]
+    //seul les admins peuvent accéder à la liste des utilisateurs
+    public function listUsers(UserRepository $userRepository): Response
     {
+        if (!$this->isGranted('ROLE_ADMIN')) {
+            $this->addFlash('danger', 'Vous devez être administrateur pour accéder à cette page.');
+            return $this->redirectToRoute('task_list');
+        }
+
         $users = $userRepository->findAll();
 
         return $this->render('user/list.html.twig', ['users' => $users]);
@@ -44,7 +50,7 @@ class UserController extends AbstractController
             $userRepository->add($user, true);
             $this->addFlash('success', 'L\'utilisateur a été bien été ajouté.');
 
-            return $this->redirectToRoute('user_list');
+            return $this->redirectToRoute('homepage');
         }
 
         return $this->render('user/create.html.twig', [
@@ -53,8 +59,14 @@ class UserController extends AbstractController
     }
 
     #[Route('/user/{id}/edit', name: 'user_edit')]
+    //seul les admins peuvent modifier les utilisateurs
+
     public function editUser(Request $request, User $user, UserRepository $userRepository): Response
     {
+        if (!$this->isGranted('ROLE_ADMIN')) {
+            $this->addFlash('danger', 'Vous devez être administrateur pour accéder à cette page.');
+            return $this->redirectToRoute('task_list');
+        }
         $form = $this->createForm(UserType::class, $user);
 
         $form->handleRequest($request);
@@ -63,7 +75,7 @@ class UserController extends AbstractController
             $userRepository->add($user, true);
             $this->addFlash('success', 'L\'utilisateur a été bien modifié.');
 
-            return $this->redirectToRoute('user_list');
+            return $this->redirectToRoute('users_list');
         }
         return  $this->render('user/edit.html.twig', [
             'form' => $form->createView(), 'user' => $user

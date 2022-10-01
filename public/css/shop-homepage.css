@@ -12,7 +12,7 @@ body {
 
 .slide-image {
     width: 100%;
-    margin: auto;
+    margin: 2 2 2 2;
 }
 
 .carousel-holder {
@@ -36,6 +36,7 @@ body {
 
 .thumbnail img {
     width: 100%;
+    margin: auto;
 }
 
 .ratings {
