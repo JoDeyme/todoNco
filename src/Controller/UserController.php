@@ -14,7 +14,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class UserController extends AbstractController
 {
     #[Route('/users', name: 'user_list')]
-    public function listAction(UserRepository $userRepository): Response
+    public function listUser(UserRepository $userRepository): Response
     {
         $users = $userRepository->findAll();
 
@@ -22,8 +22,8 @@ class UserController extends AbstractController
     }
 
     #[Route('/user/create', name: 'user_create')]
-    //retourne la page user/create avec le form Usertype
-    public function createAction(Request $request, UserRepository $userRepository, UserPasswordHasherInterface $userPasswordHasher): Response
+
+    public function createUser(Request $request, UserRepository $userRepository, UserPasswordHasherInterface $userPasswordHasher): Response
     {
         $user = new User();
         $form = $this->createForm(UserType::class, $user);
@@ -53,7 +53,7 @@ class UserController extends AbstractController
     }
 
     #[Route('/user/{id}/edit', name: 'user_edit')]
-    public function editAction(Request $request, User $user, UserRepository $userRepository): Response
+    public function editUser(Request $request, User $user, UserRepository $userRepository): Response
     {
         $form = $this->createForm(UserType::class, $user);
 

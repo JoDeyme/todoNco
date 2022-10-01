@@ -14,7 +14,7 @@ use Doctrine\Persistence\ManagerRegistry;
 class TaskController extends AbstractController
 {
     #[Route('/tasks', name: 'task_list')]
-    public function listAction(TaskRepository $taskRepository): Response
+    public function listTasks(TaskRepository $taskRepository): Response
     {
         $tasks = $taskRepository->findAll();
 
@@ -22,8 +22,17 @@ class TaskController extends AbstractController
         return $this->render('task/list.html.twig', ['tasks' => $tasks]);
     }
 
+    //retourne la liste des tasks avec isdone=true
+    #[Route('/tasks/done', name: 'task_list_done')]
+    public function listDoneAction(TaskRepository $taskRepository): Response
+    {
+        $tasks = $taskRepository->findBy(['isDone' => true]);
+
+        return $this->render('task/list.html.twig', ['tasks' => $tasks]);
+    }
+
     #[Route('/tasks/create', name: 'task_create')]
-    public function createAction(Request $request, TaskRepository $taskRepository): Response
+    public function createTask(Request $request, TaskRepository $taskRepository): Response
     {
         //user must be login 
         if (!$this->getUser()) {
@@ -52,7 +61,7 @@ class TaskController extends AbstractController
     }
 
     #[Route('/tasks/{id}/edit', name: 'task_edit')]
-    public function editAction(Request $request, Task $task, TaskRepository $taskRepository): Response
+    public function editTask(Request $request, Task $task, TaskRepository $taskRepository): Response
     {
         $form = $this->createForm(TaskType::class, $task);
 
@@ -72,7 +81,7 @@ class TaskController extends AbstractController
     }
 
     #[Route('/tasks/{id}/toggle', name: 'task_toggle')]
-    public function toggleTaskAction(Task $task, TaskRepository $taskRepository): Response
+    public function toggleTask(Task $task, TaskRepository $taskRepository): Response
     {
         $task->toggle(!$task->isDone());
         $taskRepository->add($task, true);
@@ -82,7 +91,7 @@ class TaskController extends AbstractController
     }
 
     #[Route('/tasks/{id}/delete', name: 'task_delete')]
-    public function deleteAction(Task $task, TaskRepository $taskRepository): Response
+    public function deleteTask(Task $task, TaskRepository $taskRepository): Response
     {
         $taskRepository->remove($task, true);
         $this->addFlash('success', 'La tâche a bien été supprimée.');
