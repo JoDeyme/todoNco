@@ -9,7 +9,6 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Form\TaskType;
 use App\Repository\TaskRepository;
-use Doctrine\Persistence\ManagerRegistry;
 
 class TaskController extends AbstractController
 {
@@ -63,6 +62,12 @@ class TaskController extends AbstractController
     #[Route('/tasks/{id}/edit', name: 'task_edit')]
     public function editTask(Request $request, Task $task, TaskRepository $taskRepository): Response
     {
+        //user must be login and be the owner of the task or be admin
+        if (!$this->getUser() || ($this->getUser() != $task->getUser() && !$this->isGranted('ROLE_ADMIN'))) {
+            $this->addFlash('danger', 'Vous devez être connecté pour modifier une tâche.');
+            return $this->redirectToRoute('app_login');
+        }
+
         $form = $this->createForm(TaskType::class, $task);
 
         $form->handleRequest($request);
@@ -93,7 +98,7 @@ class TaskController extends AbstractController
     #[Route('/tasks/{id}/delete', name: 'task_delete')]
     public function deleteTask(Task $task, TaskRepository $taskRepository): Response
     {
-        if ($task->getUser() !== $this->getUser() || !$this->isGranted('ROLE_ADMIN')) {
+        if ($task->getUser() !== $this->getUser() && !$this->isGranted('ROLE_ADMIN') || $task->getUser() === null) {
 
             $this->addFlash('danger', 'Seul l\'auteur de la tâche peut la supprimer.');
             return $this->redirectToRoute('task_list');

@@ -29,12 +29,14 @@
 
 		<!-- Page Content -->
 		<div class="container">
-			<div class="row">
-				<a href="{{ path('user_create') }}" class="btn btn-primary">Créer un utilisateur</a>
+			<div
+				class="row">
+
 
 				{# Si l'utilisateur est admin, un bouton vers la liste des utilisateurs est disponible #}
 				{% if is_granted('ROLE_ADMIN') %}
-					<a href="{{ path('users_list') }}" class="btn btn-primary">Liste des utilisateurs</a>
+					<a href="{{ path('user_create') }}" class="btn btn-primary">Créer un utilisateur</a>
+					<a href="{{ path('users_list') }}" id="bouton-admin" class="btn btn-primary">Liste des utilisateurs</a>
 				{% endif %}
 
 				{% if app.user %}

@@ -22,7 +22,9 @@ class UserController extends AbstractController
             return $this->redirectToRoute('task_list');
         }
 
+        //find all users
         $users = $userRepository->findAll();
+
 
         return $this->render('user/list.html.twig', ['users' => $users]);
     }
@@ -61,7 +63,7 @@ class UserController extends AbstractController
     #[Route('/user/{id}/edit', name: 'user_edit')]
     //seul les admins peuvent modifier les utilisateurs
 
-    public function editUser(Request $request, User $user, UserRepository $userRepository): Response
+    public function editUser(Request $request, User $user, UserRepository $userRepository, UserPasswordHasherInterface $userPasswordHasher): Response
     {
         if (!$this->isGranted('ROLE_ADMIN')) {
             $this->addFlash('danger', 'Vous devez être administrateur pour accéder à cette page.');
@@ -72,7 +74,14 @@ class UserController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $user->setPassword(
+                $userPasswordHasher->hashPassword(
+                    $user,
+                    $form->get('password')->getData()
+                )
+            );
             $userRepository->add($user, true);
+
             $this->addFlash('success', 'L\'utilisateur a été bien modifié.');
 
             return $this->redirectToRoute('users_list');
