@@ -3,7 +3,10 @@
 namespace App\Tests\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+
 use Symfony\Component\HttpFoundation\Response as HttpFoundationResponse;
+
+// self::ensureKernelShutdown(); à utiliser si le kernel est déjà lancé
 
 class SecurityControllerTest extends WebTestCase
 {
