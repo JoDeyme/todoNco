@@ -4,9 +4,17 @@ namespace App\Tests\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;
+use Liiip\TestFixturesBundle\Services\DatabaseToolCollection;
+use Liip\TestFixturesBundle\Services\DatabaseTools\AbstractDatabaseTool;
 
 class TaskControllerTest extends WebTestCase
 {
+
+    /** @var AbstractDatabaseTool */
+    protected $databaseTool;
+
+    private $testClient = null;
+
     public function testSomething()
     {
         $this->assertTrue(true);
@@ -16,6 +24,7 @@ class TaskControllerTest extends WebTestCase
     public function testTasksList()
 
     {
+
         $client = static::createClient();
         $client->request('GET', '/tasks');
 
@@ -24,6 +33,8 @@ class TaskControllerTest extends WebTestCase
 
     public function testCreateTaskWithBadUser()
     {
+
+
         $client = static::createClient();
         $client->request('GET', '/tasks/create');
         $this->assertResponseRedirects();
@@ -33,8 +44,15 @@ class TaskControllerTest extends WebTestCase
 
     public function testCreateTaskWithUser()
     {
+        $this->databaseTool = static::getContainer()->get(DatabaseToolCollection::class)->get();
+        $this->databaseTool->loadFixtures([
+
+            'App\DataFixtures\UserFixtures',
+            'App\DataFixtures\TaskFixtures',
+        ]);
+
         $client = static::createClient();
-        $crawler = $client->request('GET', '/login');
+        $crawler = $this->testClient->request('GET', '/login');
         $form = $crawler->selectButton('Sign in')->form(['username' => 'Test', 'password' => 'test']);
         $client->submit($form);
         $client->followRedirect();
