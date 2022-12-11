@@ -4,7 +4,7 @@ namespace App\Tests\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;
-use Liiip\TestFixturesBundle\Services\DatabaseToolCollection;
+use Liip\TestFixturesBundle\Services\DatabaseToolCollection;
 use Liip\TestFixturesBundle\Services\DatabaseTools\AbstractDatabaseTool;
 
 class TaskControllerTest extends WebTestCase
@@ -12,8 +12,14 @@ class TaskControllerTest extends WebTestCase
 
     /** @var AbstractDatabaseTool */
     protected $databaseTool;
-
     private $testClient = null;
+
+    public function setUp(): void
+    {
+        parent::setUp();
+        $this->testClient = static::createClient();
+        $this->databaseTool = static::getContainer()->get(DatabaseToolCollection::class)->get();
+    }
 
     public function testSomething()
     {
@@ -24,43 +30,37 @@ class TaskControllerTest extends WebTestCase
     public function testTasksList()
 
     {
-
-        $client = static::createClient();
-        $client->request('GET', '/tasks');
-
+        $this->databaseTool->loadFixtures([
+            'App\DataFixtures\AppFixtures'
+        ]);
+        $this->testClient->request('GET', '/tasks');
         $this->assertResponseStatusCodeSame(Response::HTTP_OK);
     }
 
     public function testCreateTaskWithBadUser()
     {
-
-
-        $client = static::createClient();
-        $client->request('GET', '/tasks/create');
+        $this->testClient->request('GET', '/tasks/create');
         $this->assertResponseRedirects();
-        $client->followRedirect();
+        $this->testClient->followRedirect();
         $this->assertSelectorExists('.alert.alert-danger', "Vous devez être connecté pour créer une tâche.");
     }
 
     public function testCreateTaskWithUser()
     {
-        $this->databaseTool = static::getContainer()->get(DatabaseToolCollection::class)->get();
-        $this->databaseTool->loadFixtures([
 
-            'App\DataFixtures\UserFixtures',
-            'App\DataFixtures\TaskFixtures',
+        $this->databaseTool->loadFixtures([
+            'App\DataFixtures\AppFixtures'
         ]);
 
-        $client = static::createClient();
         $crawler = $this->testClient->request('GET', '/login');
-        $form = $crawler->selectButton('Sign in')->form(['username' => 'Test', 'password' => 'test']);
-        $client->submit($form);
-        $client->followRedirect();
-        $crawler = $client->request('GET', '/tasks/create');
+        $form = $crawler->selectButton('Sign in')->form(['username' => 'Admin', 'password' => 'admin']);
+        $this->testClient->submit($form);
+        $this->testClient->followRedirect();
+        $crawler = $this->testClient->request('GET', '/tasks/create');
         $this->assertResponseStatusCodeSame(Response::HTTP_OK);
         $this->assertSelectorExists('form[name="task"]');
     }
-
+    /*
     public function testCreateTaskWithAdmin()
     {
         $client = static::createClient();
@@ -99,5 +99,5 @@ class TaskControllerTest extends WebTestCase
         $crawler = $client->request('GET', $link);
         $this->assertResponseStatusCodeSame(Response::HTTP_OK);
         $this->assertSelectorExists('form[name="task"]');
-    }
+    } */
 }
