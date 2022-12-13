@@ -2,6 +2,7 @@
 
 namespace App\Tests\Controller;
 
+use App\Repository\UserRepository;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;
 use Liip\TestFixturesBundle\Services\DatabaseToolCollection;
@@ -19,6 +20,20 @@ class TaskControllerTest extends WebTestCase
         parent::setUp();
         $this->testClient = static::createClient();
         $this->databaseTool = static::getContainer()->get(DatabaseToolCollection::class)->get();
+    }
+
+    public function getNormalUser()
+
+    {
+        $userRepository = static::getContainer()->get(UserRepository::class);
+        return $userRepository->findOneBy(['username' => 'User0']);
+    }
+
+    public function getAdminUser()
+
+    {
+        $userRepository = static::getContainer()->get(UserRepository::class);
+        return $userRepository->findOneBy(['username' => 'Admin']);
     }
 
     public function testSomething()
@@ -52,6 +67,17 @@ class TaskControllerTest extends WebTestCase
             'App\DataFixtures\AppFixtures'
         ]);
 
+        $this->testClient->loginUser($this->getNormalUser());
+        $this->testClient->request('GET', '/tasks/create');
+        $this->assertResponseStatusCodeSame(Response::HTTP_OK);
+        $this->assertSelectorExists('form[name="task"]');
+    }
+
+    public function testCreateTaskWithAdmin()
+    {
+        $this->databaseTool->loadFixtures([
+            'App\DataFixtures\AppFixtures'
+        ]);
         $crawler = $this->testClient->request('GET', '/login');
         $form = $crawler->selectButton('Sign in')->form(['username' => 'Admin', 'password' => 'admin']);
         $this->testClient->submit($form);
@@ -60,19 +86,8 @@ class TaskControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(Response::HTTP_OK);
         $this->assertSelectorExists('form[name="task"]');
     }
-    /*
-    public function testCreateTaskWithAdmin()
-    {
-        $client = static::createClient();
-        $crawler = $client->request('GET', '/login');
-        $form = $crawler->selectButton('Sign in')->form(['username' => 'Admin', 'password' => 'admin']);
-        $client->submit($form);
-        $client->followRedirect();
-        $crawler = $client->request('GET', '/tasks/create');
-        $this->assertResponseStatusCodeSame(Response::HTTP_OK);
-        $this->assertSelectorExists('form[name="task"]');
-    }
 
+    /*
     public function testEditTaskWithBadUser()
     {
         $client = static::createClient();
@@ -100,4 +115,11 @@ class TaskControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(Response::HTTP_OK);
         $this->assertSelectorExists('form[name="task"]');
     } */
+
+    protected function tearDown(): void
+    {
+        parent::tearDown();
+        unset($this->databaseTool);
+        unset($this->testClient);
+    }
 }
