@@ -64,8 +64,8 @@ class TaskController extends AbstractController
     {
         //user must be login and be the owner of the task or be admin
         if (!$this->getUser() || ($this->getUser() != $task->getUser() && !$this->isGranted('ROLE_ADMIN'))) {
-            $this->addFlash('danger', 'Vous devez être connecté pour modifier une tâche.');
-            return $this->redirectToRoute('app_login');
+            $this->addFlash('danger', 'Seul l\'auteur de la tâche peut la modifier.');
+            return $this->redirectToRoute('task_list');
         }
 
         $form = $this->createForm(TaskType::class, $task);
@@ -88,6 +88,12 @@ class TaskController extends AbstractController
     #[Route('/tasks/{id}/toggle', name: 'task_toggle')]
     public function toggleTask(Task $task, TaskRepository $taskRepository): Response
     {
+        if ($task->getUser() !== $this->getUser() && !$this->isGranted('ROLE_ADMIN') || $task->getUser() === null) {
+
+            $this->addFlash('danger', 'Seul l\'auteur de la tâche peut la marquer comme faite.');
+            return $this->redirectToRoute('task_list');
+        }
+
         $task->toggle(!$task->isDone());
         $taskRepository->add($task, true);
         $this->addFlash('success', sprintf('La tâche %s a bien été marquée comme faite.', $task->getTitle()));

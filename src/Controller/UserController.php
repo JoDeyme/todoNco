@@ -33,6 +33,14 @@ class UserController extends AbstractController
 
     public function createUser(Request $request, UserRepository $userRepository, UserPasswordHasherInterface $userPasswordHasher): Response
     {
+        // only admin can create users
+        if (!$this->isGranted('ROLE_ADMIN')) {
+            $this->addFlash('danger', 'Vous devez être administrateur pour accéder à cette page.');
+
+            return $this->redirectToRoute('task_list');
+        }
+
+
         $user = new User();
         $form = $this->createForm(UserType::class, $user);
 
@@ -89,5 +97,20 @@ class UserController extends AbstractController
         return  $this->render('user/edit.html.twig', [
             'form' => $form->createView(), 'user' => $user
         ]);
+    }
+
+    #[Route('/user/{id}/delete', name: 'user_delete')]
+    //seul les admins peuvent supprimer les utilisateurs
+
+    public function deleteUser(User $user, UserRepository $userRepository): Response
+    {
+        if (!$this->isGranted('ROLE_ADMIN')) {
+            $this->addFlash('danger', 'Vous devez être administrateur pour accéder à cette page.');
+            return $this->redirectToRoute('task_list');
+        }
+        $userRepository->remove($user, true);
+        $this->addFlash('success', 'L\'utilisateur a été bien supprimé.');
+
+        return $this->redirectToRoute('users_list');
     }
 }

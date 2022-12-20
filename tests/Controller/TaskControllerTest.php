@@ -2,6 +2,8 @@
 
 namespace App\Tests\Controller;
 
+use App\DataFixtures\AppFixtures;
+use App\Repository\TaskRepository;
 use App\Repository\UserRepository;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;
@@ -46,13 +48,15 @@ class TaskControllerTest extends WebTestCase
 
     {
         $this->databaseTool->loadFixtures([
-            'App\DataFixtures\AppFixtures'
+            AppFixtures::class
         ]);
         $this->testClient->request('GET', '/tasks');
         $this->assertResponseStatusCodeSame(Response::HTTP_OK);
     }
 
-    public function testCreateTaskWithBadUser()
+    //Test de la page de création de tâche
+
+    public function testCreateTaskNotLogged()
     {
         $this->testClient->request('GET', '/tasks/create');
         $this->assertResponseRedirects();
@@ -64,7 +68,7 @@ class TaskControllerTest extends WebTestCase
     {
 
         $this->databaseTool->loadFixtures([
-            'App\DataFixtures\AppFixtures'
+            AppFixtures::class
         ]);
 
         $this->testClient->loginUser($this->getNormalUser());
@@ -76,45 +80,204 @@ class TaskControllerTest extends WebTestCase
     public function testCreateTaskWithAdmin()
     {
         $this->databaseTool->loadFixtures([
-            'App\DataFixtures\AppFixtures'
+            AppFixtures::class
         ]);
-        $crawler = $this->testClient->request('GET', '/login');
-        $form = $crawler->selectButton('Sign in')->form(['username' => 'Admin', 'password' => 'admin']);
-        $this->testClient->submit($form);
-        $this->testClient->followRedirect();
-        $crawler = $this->testClient->request('GET', '/tasks/create');
+        $this->testClient->loginUser($this->getAdminUser());
+        $this->testClient->request('GET', '/tasks/create');
         $this->assertResponseStatusCodeSame(Response::HTTP_OK);
         $this->assertSelectorExists('form[name="task"]');
     }
 
-    /*
-    public function testEditTaskWithBadUser()
+    //Test de la page d'édition de tâche
+
+    public function testEditTaskNotLogged()
     {
-        $client = static::createClient();
+        $this->databaseTool->loadFixtures([
+            AppFixtures::class
+        ]);
 
-        $crawler = $client->request('GET', '/tasks');
-        $link = $crawler->filter('p:contains("Test5")')->siblings()->filter('h4')->filter('a')->Attr('href');
+        $crawler = $this->testClient->request('GET', '/tasks');
+        $link = $crawler->filter('p:contains("User0")')->siblings()->filter('h4')->filter('a')->Attr('href');
 
-        $client->request('GET', $link);
+        $this->testClient->request('GET', $link);
         $this->assertResponseRedirects();
-        $client->followRedirect();
+        $this->testClient->followRedirect();
         $this->assertSelectorExists('.alert.alert-danger', "Vous devez être connecté pour modifier une tâche.");
     }
 
+    public function testEditTaskWithBadUser()
+    {
+        $this->databaseTool->loadFixtures([
+            AppFixtures::class
+        ]);
+
+        $crawler = $this->testClient->request('GET', '/tasks');
+        $link = $crawler->filter('p:contains("User0")')->siblings()->filter('h4')->filter('a')->Attr('href');
+
+        $this->testClient->request('GET', $link);
+        $this->assertResponseRedirects();
+        $this->testClient->followRedirect();
+        $this->assertSelectorExists('.alert.alert-danger', "Vous devez être connecté pour modifier une tâche.");
+    }
 
     public function testEditTaskWithUser()
     {
-        $client = static::createClient();
-        $crawler = $client->request('GET', '/login');
-        $form = $crawler->selectButton('Sign in')->form(['username' => 'Test5', 'password' => 'test']);
-        $client->submit($form);
-        $client->followRedirect();
-        $crawler = $client->request('GET', '/tasks');
-        $link = $crawler->filter('p:contains("Test5")')->siblings()->filter('h4')->filter('a')->Attr('href');
-        $crawler = $client->request('GET', $link);
+        $this->databaseTool->loadFixtures([
+            AppFixtures::class
+        ]);
+
+        $this->testClient->loginUser($this->getNormalUser());
+        $crawler = $this->testClient->request('GET', '/tasks');
+        $link = $crawler->filter('p:contains("User0")')->siblings()->filter('h4')->filter('a')->Attr('href');
+        $crawler = $this->testClient->request('GET', $link);
         $this->assertResponseStatusCodeSame(Response::HTTP_OK);
         $this->assertSelectorExists('form[name="task"]');
-    } */
+    }
+
+    public function testEditTaskWithAdmin()
+    {
+        $this->databaseTool->loadFixtures([
+            AppFixtures::class
+        ]);
+
+        $this->testClient->loginUser($this->getAdminUser());
+        $crawler = $this->testClient->request('GET', '/tasks');
+        $link = $crawler->filter('p:contains("User5")')->siblings()->filter('h4')->filter('a')->Attr('href');
+        $crawler = $this->testClient->request('GET', $link);
+        $this->assertResponseStatusCodeSame(Response::HTTP_OK);
+        $this->assertSelectorExists('form[name="task"]');
+    }
+
+    //Test de la page de suppression de tâche
+
+    public function testDeleteTaskNotLogged()
+    {
+        $this->databaseTool->loadFixtures([
+            AppFixtures::class
+        ]);
+
+        $taskRepository = static::getContainer()->get(TaskRepository::class);
+        $id = $taskRepository->findOneBy(['title' => "Task1"])->getId();
+
+        $this->testClient->request('GET', 'tasks/' . $id . '/delete');
+        $this->assertResponseRedirects();
+        $this->testClient->followRedirect();
+        $this->assertSelectorExists('.alert.alert-danger', "Vous devez être connecté pour supprimer une tâche.");
+    }
+
+    public function testDeleteTaskWithBadUser()
+    {
+        $this->databaseTool->loadFixtures([
+            AppFixtures::class
+        ]);
+
+        $this->testClient->loginUser($this->getNormalUser());
+        $taskRepository = static::getContainer()->get(TaskRepository::class);
+        $id = $taskRepository->findOneBy(['title' => "Task1"])->getId();
+
+        $this->testClient->request('GET', 'tasks/' . $id . '/delete');
+        $this->assertResponseRedirects();
+        $this->testClient->followRedirect();
+        $this->assertSelectorExists('.alert.alert-danger', "Seul l'auteur de la tâche peut la supprimer.");
+    }
+
+    public function testDeleteTaskWithUser()
+    {
+        $this->databaseTool->loadFixtures([
+            AppFixtures::class
+        ]);
+
+        $this->testClient->loginUser($this->getNormalUser());
+        $taskRepository = static::getContainer()->get(TaskRepository::class);
+        $id = $taskRepository->findOneBy(['title' => "Task0"])->getId();
+
+        $this->testClient->request('GET', 'tasks/' . $id . '/delete');
+        $this->assertResponseRedirects();
+        $this->testClient->followRedirect();
+        $this->assertSelectorExists('.alert.alert-success', "La tâche a bien été supprimée.");
+    }
+
+    public function testDeleteTaskWithAdmin()
+    {
+        $this->databaseTool->loadFixtures([
+            AppFixtures::class
+        ]);
+
+        $this->testClient->loginUser($this->getAdminUser());
+        $taskRepository = static::getContainer()->get(TaskRepository::class);
+        $id = $taskRepository->findOneBy(['title' => "Task5"])->getId();
+
+        $this->testClient->request('GET', 'tasks/' . $id . '/delete');
+        $this->assertResponseRedirects();
+        $this->testClient->followRedirect();
+        $this->assertSelectorExists('.alert.alert-success', "La tâche a bien été supprimée.");
+    }
+
+    //Test de la page de marquage d'une tâche comme faite
+
+    public function testToggleTaskNotLogged()
+    {
+        $this->databaseTool->loadFixtures([
+            AppFixtures::class
+        ]);
+
+        $taskRepository = static::getContainer()->get(TaskRepository::class);
+        $id = $taskRepository->findOneBy(['title' => "Task0"])->getId();
+
+        $this->testClient->request('GET', 'tasks/' . $id . '/toggle');
+        $this->assertResponseRedirects();
+        $this->testClient->followRedirect();
+        $this->assertSelectorExists('.alert.alert-danger', "Vous devez être connecté pour marquer une tâche comme faite.");
+    }
+
+    public function testToggleTaskWithBadUser()
+    {
+        $this->databaseTool->loadFixtures([
+            AppFixtures::class
+        ]);
+
+        $this->testClient->loginUser($this->getNormalUser());
+        $taskRepository = static::getContainer()->get(TaskRepository::class);
+        $id = $taskRepository->findOneBy(['title' => "Task1"])->getId();
+
+        $this->testClient->request('GET', 'tasks/' . $id . '/toggle');
+        $this->assertResponseRedirects();
+        $this->testClient->followRedirect();
+        $this->assertSelectorExists('.alert.alert-danger', "Seul l'auteur de la tâche peut la marquer comme faite.");
+    }
+
+    public function testToggleTaskWithUser()
+    {
+        $this->databaseTool->loadFixtures([
+            AppFixtures::class
+        ]);
+
+        $this->testClient->loginUser($this->getNormalUser());
+        $taskRepository = static::getContainer()->get(TaskRepository::class);
+        $id = $taskRepository->findOneBy(['title' => "Task0"])->getId();
+
+        $this->testClient->request('GET', 'tasks/' . $id . '/toggle');
+        $this->assertResponseRedirects();
+        $this->testClient->followRedirect();
+        $this->assertSelectorExists('.alert.alert-success', "La tâche a bien été marquée comme faite.");
+    }
+
+    public function testToggleTaskWithAdmin()
+    {
+        $this->databaseTool->loadFixtures([
+            AppFixtures::class
+        ]);
+
+        $this->testClient->loginUser($this->getAdminUser());
+        $taskRepository = static::getContainer()->get(TaskRepository::class);
+        $id = $taskRepository->findOneBy(['title' => "Task5"])->getId();
+
+        $this->testClient->request('GET', 'tasks/' . $id . '/toggle');
+        $this->assertResponseRedirects();
+        $this->testClient->followRedirect();
+        $this->assertSelectorExists('.alert.alert-success', "La tâche a bien été marquée comme faite.");
+    }
+
 
     protected function tearDown(): void
     {
