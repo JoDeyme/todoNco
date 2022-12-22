@@ -54,6 +54,17 @@ class TaskControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(Response::HTTP_OK);
     }
 
+    public function testTasksDoneList()
+
+    {
+        $this->databaseTool->loadFixtures([
+            AppFixtures::class
+        ]);
+        $crawler = $this->testClient->request('GET', '/tasks/done');
+        $this->assertResponseStatusCodeSame(Response::HTTP_OK);
+        $this->assertCount(10, $crawler->filter('span', 'glyphicon glyphicon-ok'));
+    }
+
     //Test de la page de création de tâche
 
     public function testCreateTaskNotLogged()
@@ -72,9 +83,17 @@ class TaskControllerTest extends WebTestCase
         ]);
 
         $this->testClient->loginUser($this->getNormalUser());
-        $this->testClient->request('GET', '/tasks/create');
+        $crawler = $this->testClient->request('GET', '/tasks/create');
         $this->assertResponseStatusCodeSame(Response::HTTP_OK);
-        $this->assertSelectorExists('form[name="task"]');
+        $this->assertResponseIsSuccessful();
+        $form = $crawler->selectButton('Ajouter')->form([
+            'task[title]' => 'Titre test de la tâche',
+            'task[content]' => 'Contenu test de la tâche'
+        ]);
+        $this->testClient->submit($form);
+        $this->testClient->followRedirect();
+        $this->assertResponseIsSuccessful();
+        $this->assertSelectorExists('.alert.alert-success', 'La tâche a été bien été ajoutée.');
     }
 
     public function testCreateTaskWithAdmin()
@@ -83,9 +102,17 @@ class TaskControllerTest extends WebTestCase
             AppFixtures::class
         ]);
         $this->testClient->loginUser($this->getAdminUser());
-        $this->testClient->request('GET', '/tasks/create');
+        $crawler = $this->testClient->request('GET', '/tasks/create');
         $this->assertResponseStatusCodeSame(Response::HTTP_OK);
-        $this->assertSelectorExists('form[name="task"]');
+        $this->assertResponseIsSuccessful();
+        $form = $crawler->selectButton('Ajouter')->form([
+            'task[title]' => 'Titre test de la tâche',
+            'task[content]' => 'Contenu test de la tâche'
+        ]);
+        $this->testClient->submit($form);
+        $this->testClient->followRedirect();
+        $this->assertResponseIsSuccessful();
+        $this->assertSelectorExists('.alert.alert-success', 'La tâche a été bien été ajoutée.');
     }
 
     //Test de la page d'édition de tâche
@@ -131,7 +158,15 @@ class TaskControllerTest extends WebTestCase
         $link = $crawler->filter('p:contains("User0")')->siblings()->filter('h4')->filter('a')->Attr('href');
         $crawler = $this->testClient->request('GET', $link);
         $this->assertResponseStatusCodeSame(Response::HTTP_OK);
-        $this->assertSelectorExists('form[name="task"]');
+        $this->assertResponseIsSuccessful();
+        $form = $crawler->selectButton('Modifier')->form([
+            'task[title]' => 'Titre test de la tâche modifiée',
+            'task[content]' => 'Contenu test de la tâche modifiée'
+        ]);
+        $this->testClient->submit($form);
+        $this->testClient->followRedirect();
+        $this->assertResponseIsSuccessful();
+        $this->assertSelectorExists('.alert.alert-success', 'La tâche a été bien été modifiée.');
     }
 
     public function testEditTaskWithAdmin()
@@ -145,7 +180,15 @@ class TaskControllerTest extends WebTestCase
         $link = $crawler->filter('p:contains("User5")')->siblings()->filter('h4')->filter('a')->Attr('href');
         $crawler = $this->testClient->request('GET', $link);
         $this->assertResponseStatusCodeSame(Response::HTTP_OK);
-        $this->assertSelectorExists('form[name="task"]');
+        $this->assertResponseIsSuccessful();
+        $form = $crawler->selectButton('Modifier')->form([
+            'task[title]' => 'Titre test de la tâche modifiée',
+            'task[content]' => 'Contenu test de la tâche modifiée'
+        ]);
+        $this->testClient->submit($form);
+        $this->testClient->followRedirect();
+        $this->assertResponseIsSuccessful();
+        $this->assertSelectorExists('.alert.alert-success', 'La tâche a été bien été modifiée.');
     }
 
     //Test de la page de suppression de tâche

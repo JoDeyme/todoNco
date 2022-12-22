@@ -91,6 +91,16 @@ class SecurityControllerTest extends WebTestCase
         $this->assertSelectorExists('a:contains("Liste des utilisateurs")');
     }
 
+    public function testAuhtenticationUserAlreadyConnected()
+    {
+        $this->databaseTool->loadFixtures([
+            AppFixtures::class
+        ]);
+        $this->testClient->loginUser($this->getNormalUser());
+        $this->testClient->request('GET', '/login');
+        $this->assertResponseRedirects('/');
+    }
+
     //Test de déconnexion
 
     public function testLogoutUser()
@@ -131,15 +141,24 @@ class SecurityControllerTest extends WebTestCase
 
     public function testAdminCreateUser()
     {
+
         $this->databaseTool->loadFixtures([
             AppFixtures::class
         ]);
-        $crawler = $this->testClient->request('GET', '/login');
-        $form = $crawler->selectButton('Sign in')->form(['username' => 'Admin', 'password' => 'admin']);
-        $this->testClient->submit($form);
-        $this->testClient->followRedirect('/');
-        $this->testClient->request('GET', '/user/create');
+        $this->testClient->loginUser($this->getAdminUser());
+
+        $crawler = $this->testClient->request('GET', '/user/create');
         $this->assertResponseIsSuccessful();
+        $form = $crawler->selectButton('Ajouter')->form([
+            'user[username]' => 'Usertest',
+            'user[password][first]' => 'usertest',
+            'user[password][second]' => 'usertest',
+            'user[email]' => 'user@mail.com'
+        ]);
+        $this->testClient->submit($form);
+        $this->testClient->followRedirect();
+        $this->assertResponseIsSuccessful();
+        $this->assertSelectorExists('.alert.alert-success', 'L\'utilisateur a été bien été ajouté.');
     }
 
     public function testUserCreateUser()
@@ -176,8 +195,18 @@ class SecurityControllerTest extends WebTestCase
         $this->testClient->loginUser($this->getAdminUser());
         $userRepository = static::getContainer()->get(UserRepository::class);
         $id = $userRepository->findOneBy(['username' => 'User0'])->getId();
-        $this->testClient->request('GET', 'user/' . $id . '/edit');
+        $crawler = $this->testClient->request('GET', 'user/' . $id . '/edit');
         $this->assertResponseIsSuccessful();
+        $form = $crawler->selectButton('Modifier')->form([
+            'user[username]' => 'UserModif',
+            'user[password][first]' => 'usermodif',
+            'user[password][second]' => 'usermodif',
+            'user[email]' => 'usermodif@mail.com'
+        ]);
+        $this->testClient->submit($form);
+        $this->testClient->followRedirect();
+        $this->assertResponseIsSuccessful();
+        $this->assertSelectorExists('.alert.alert-success', 'L\'utilisateur a été bien modifié.');
     }
 
     public function testUserEditUser()
@@ -217,6 +246,9 @@ class SecurityControllerTest extends WebTestCase
         $id = $userRepository->findOneBy(['username' => 'User1'])->getId();
         $this->testClient->request('GET', 'user/' . $id . '/delete');
         $this->assertResponseRedirects();
+        $this->testClient->followRedirect();
+        $this->assertResponseIsSuccessful();
+        $this->assertSelectorExists('.alert.alert-success', 'L\'utilisateur a été bien supprimé.');
     }
 
     public function testUserDeleteUser()

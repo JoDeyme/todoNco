@@ -32,7 +32,14 @@ class AppFixtures extends Fixture implements FixtureInterface
             $task->setCreatedAt(new \DateTimeImmutable());
             $task->setIsDone(false);
             $task->setUser($user);
+            $taskdone = new Task();
+            $taskdone->setTitle('TaskDone' . $i . '-2');
+            $taskdone->setContent('ContentDone' . $i . '-2');
+            $taskdone->setCreatedAt(new \DateTimeImmutable());
+            $taskdone->setIsDone(true);
+            $taskdone->setUser($user);
 
+            $manager->persist($taskdone);
             $manager->persist($task);
             $manager->persist($user);
         }

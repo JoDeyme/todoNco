@@ -21,11 +21,7 @@ class UserController extends AbstractController
             $this->addFlash('danger', 'Vous devez être administrateur pour accéder à cette page.');
             return $this->redirectToRoute('task_list');
         }
-
-        //find all users
         $users = $userRepository->findAll();
-
-
         return $this->render('user/list.html.twig', ['users' => $users]);
     }
 
@@ -55,7 +51,6 @@ class UserController extends AbstractController
                     $form->get('password')->getData()
                 )
             );
-
 
             $userRepository->add($user, true);
             $this->addFlash('success', 'L\'utilisateur a été bien été ajouté.');
