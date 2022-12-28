@@ -21,10 +21,18 @@ class Task
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank(message: 'Vous devez saisir un titre.')]
+    #[Assert\Length(
+        max: 255,
+        maxMessage: 'Le titre doit faire au plus {{ limit }} caractères.'
+    )]
     private ?string $title = null;
 
     #[ORM\Column(type: Types::TEXT)]
     #[Assert\NotBlank(message: 'Vous devez saisir du contenu.')]
+    #[Assert\Length(
+        max: 1000,
+        maxMessage: 'Le contenu doit faire au plus {{ limit }} caractères.'
+    )]
     private ?string $content = null;
 
     #[ORM\Column]
@@ -73,6 +81,11 @@ class Task
         $this->content = $content;
 
         return $this;
+    }
+
+    public function getIsDone(): ?bool
+    {
+        return $this->isDone;
     }
 
     public function setIsDone(bool $isDone): self

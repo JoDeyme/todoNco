@@ -292,6 +292,20 @@ class SecurityControllerTest extends WebTestCase
         $this->assertSelectorExists('h1:contains("Liste des utilisateurs")');
     }
 
+    public function testUserListUser()
+    {
+        $this->databaseTool->loadFixtures([
+            AppFixtures::class
+        ]);
+        $crawler = $this->testClient->request('GET', '/login');
+        $form = $crawler->selectButton('Sign in')->form(['username' => 'User0', 'password' => 'user0']);
+        $this->testClient->submit($form);
+        $this->testClient->followRedirect('/');
+        $this->testClient->request('GET', '/users');
+        $this->testClient->followRedirect('/');
+        $this->assertSelectorExists('.alert.alert-danger', 'Vous devez être administrateur pour accéder à cette page.');
+    }
+
     protected function tearDown(): void
     {
         parent::tearDown();
