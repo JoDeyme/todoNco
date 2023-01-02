@@ -12,7 +12,11 @@ body {
 
 .slide-image {
     width: 100%;
-    margin: 2 2 2 2;
+    margin: 16px;
+}
+
+.margin-around {
+    margin: 16px;
 }
 
 .carousel-holder {

@@ -11,7 +11,13 @@
 
 	<div class="row">
 		{{ form_start(form, {'action' : path('user_edit', {'id' : user.id})}) }}
-		{{ form_widget(form) }}
+		<div class="form-group">
+			{{ form_label(form.username) }}
+			{{ form_widget(form.username) }}
+
+			{{ form_widget(form) }}
+		</div>
+
 
 		<button type="submit" class="btn btn-success pull-right">Modifier</button>
 		<a href="{{ path('users_list') }}" class="btn btn-danger pull-right">Annuler</a>

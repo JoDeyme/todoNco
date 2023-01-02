@@ -1,0 +1,5 @@
+services:
+    # Déclarez le service de validateur
+    App\Tests\Entity\TaskTest:
+        # Injectez le validateur dans la classe de test
+        arguments: ['@Symfony\Component\Validator\Validator\ValidatorInterface']

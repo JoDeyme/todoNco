@@ -4,12 +4,29 @@ namespace App\Tests\Entity;
 
 use App\Entity\Task;
 use App\Entity\User;
+use PHPUnit\Util\Xml\Validator;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 
 class TaskTest extends KernelTestCase
 {
+
+    private $validator;
+
+
+    public function __construct($name = null, array $data = [], $dataName = '')
+    {
+        parent::__construct($name, $data, $dataName);
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        self::bootKernel();
+        $this->validator = static::$kernel->getContainer()->get('validator');
+    }
+
 
 
     public function createUser()
@@ -33,9 +50,8 @@ class TaskTest extends KernelTestCase
         $task->setIsDone(false);
         $task->setUser($this->createUser());
 
-        self::bootKernel();
+        $error = $this->validator->validate($task);
 
-        $error = $this->getContainer()->get('validator')->validate($task);
         $this->assertCount(0, $error);
 
         $this->assertEquals('testTitle', $task->getTitle());
@@ -55,7 +71,8 @@ class TaskTest extends KernelTestCase
         $task->setUser($this->createUser());
 
         self::bootKernel();
-        $error = $this->getContainer()->get('validator')->validate($task);
+        //$error = $this->getContainer()->get('validator')->validate($task);
+        $error = $this->validator->validate($task);
         $this->assertCount(1, $error);
     }
 
@@ -70,7 +87,7 @@ class TaskTest extends KernelTestCase
         $task->setUser($this->createUser());
 
         self::bootKernel();
-        $error = $this->getContainer()->get('validator')->validate($task);
+        $error = $this->validator->validate($task);
         $this->assertCount(1, $error);
     }
 
@@ -85,7 +102,7 @@ class TaskTest extends KernelTestCase
         $task->setUser($this->createUser());
 
         self::bootKernel();
-        $error = $this->getContainer()->get('validator')->validate($task);
+        $error = $this->validator->validate($task);
         $this->assertCount(2, $error);
     }
 
@@ -100,7 +117,7 @@ class TaskTest extends KernelTestCase
         $task->setUser($this->createUser());
 
         self::bootKernel();
-        $error = $this->getContainer()->get('validator')->validate($task);
+        $error = $this->validator->validate($task);
         $this->assertCount(0, $error);
         $this->assertEquals(false, $task->getIsDone());
         $task->toggle(true);
