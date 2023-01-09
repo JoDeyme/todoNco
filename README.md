@@ -65,7 +65,7 @@ Projet 8 de la formation Développeur web Symfony d'OpenClassrooms.
 
 Uniquement accessible aux utilisateurs avec le rôle "ROLE_ADMIN".
 
-Permet de gérer les utilisateurs. 
+Permet de gérer les utilisateurs (création, modification, suppression).
 
 ## Auteur
 
