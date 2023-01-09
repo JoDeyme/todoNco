@@ -29,7 +29,7 @@ class UserController extends AbstractController
 
     public function createUser(Request $request, UserRepository $userRepository, UserPasswordHasherInterface $userPasswordHasher): Response
     {
-        // only admin can create users
+
         if (!$this->isGranted('ROLE_ADMIN')) {
             $this->addFlash('danger', 'Vous devez être administrateur pour accéder à cette page.');
 

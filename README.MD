@@ -28,7 +28,7 @@ Projet 8 de la formation Développeur web Symfony d'OpenClassrooms.
 
 ### Créer un compte
 
-Uniquement accessible aux utilisateurs avec le rôle "ROLE_ADMIN".
+**Uniquement accessible aux utilisateurs avec le rôle "ROLE_ADMIN".**
 
 - Se rendre sur la page d'accueil
 - Cliquer sur le bouton "Créer un utilisateur"
