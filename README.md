@@ -1,5 +1,3 @@
-# Todo N' co
-
 
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/6b14d199106b4844ad86bb868d48a637)](https://www.codacy.com/gh/JoDeyme/todoNco/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=JoDeyme/todoNco&amp;utm_campaign=Badge_Grade)
 
@@ -24,9 +22,6 @@ Projet 8 de la formation Développeur web Symfony d'OpenClassrooms.
 - Créer les tables avec la commande `php bin/console doctrine:schema:update --force`
 - Charger les fixtures avec la commande `php bin/console doctrine:fixtures:load`
 - Lancer le serveur avec la commande `symfony server:start`
-
-
-
 
 ## Utilisation
 
@@ -68,7 +63,7 @@ Projet 8 de la formation Développeur web Symfony d'OpenClassrooms.
 
 Uniquement accessible aux utilisateurs avec le rôle "ROLE_ADMIN".
 
-Permet de gérer les utilisateurs (création, modification, suppression).
+Permet de gérer les utilisateurs. 
 
 ## Auteur
 
