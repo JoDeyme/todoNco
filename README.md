@@ -25,15 +25,7 @@ Projet 8 de la formation Développeur web Symfony d'OpenClassrooms.
 - Charger les fixtures avec la commande `php bin/console doctrine:fixtures:load`
 - Lancer le serveur avec la commande `symfony server:start`
 
-## Contribution
 
-Pour contribuer au projet, merci de suivre les étapes suivantes :
-
-- Forker le projet
-- Créer une branche pour votre fonctionnalité (`git checkout -b feature/AmazingFeature`)
-- Commiter vos changements (`git commit -m 'Add some AmazingFeature'`)
-- Pusher sur la branche (`git push origin feature/AmazingFeature`)
-- Ouvrir une Pull Request
 
 
 ## Utilisation
